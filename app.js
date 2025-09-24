@@ -1,9 +1,28 @@
-// Utility: parse date string “September 23, 2025” → Date object
+// --- Helper constants & sets ---
+const STATES_RED = new Set(["NY","NJ","CA","MA","NV","OR"]);
+const TRAVELER_PURPLE = new Set([
+  "Gabriela Endara","Jose Arroyo","Andres Alvarez","Gianni Bloise","Genesis Ronquillo",
+  "Martha Aguirre","Paola Salcan","Karen Chapman","Daniel Molineros","Anto",
+  "Veronica Endara","Delia Vera","Milton Jijon","Kenia Jimenez","Carlos Matute",
+  "Andrea Martinez","Delicia Rodriguez Mendez","Genesis Ronquillo - Vuelo de carga",
+  "Daniel Lliguicota","Romina Campodonico + Jeampiero","Isabella Piedrahita",
+  "Juan C Chevrasco","Nicole Matamoros","Fabricio Triviño","Freddy Arboleda",
+  "David Muzzio Ruliova","Santiago Ruliova","Betty Lastre","Priscila Alejandro",
+  "Jeniffer Zambrano","Alison Fajardo","Wesley Triviño","Leonardo Pauta",
+  "Erick Pauta","Dario Pauta","Diana Pauta","Jorge Ivan Alejandro","Ana Belen Alejandro",
+  "Bruno Pagnacco","Katy Valdivieso","Eddy Vera","Ericka Pluas","Domenica Pluas"
+]);
+
 function parseDateString(str) {
   return new Date(str);
 }
-
-// Determine default week window (today → +7 days)
+function getWeekdayNumber(date) {
+  // returns 1 = Monday, ... 7 = Sunday
+  const d = new Date(date);
+  let wd = d.getDay(); // 0 (Sun) to 6 (Sat)
+  if (wd === 0) wd = 7;
+  return wd;
+}
 function getDefaultDateRange() {
   const now = new Date();
   const end = new Date(now);
@@ -11,150 +30,185 @@ function getDefaultDateRange() {
   return { start: now, end };
 }
 
-let allTrips = [];  // holds all data
+// --- Global state ---
+let allTrips = [];  // original data array
 
-// Render trips into columns
-function renderTrips(filterStart, filterEnd) {
-  // Clear all columns
-  const statuses = ["Pending", "TX Approved", "Rejected", "Preparing", "ReadyForLabel"];
-  statuses.forEach(status => {
-    document.getElementById(`col-${status}`).innerHTML = "";
-  });
-
-  allTrips.forEach(trip => {
-    // Filter by Ship Bundle date if outside range
-    const bundleDate = parseDateString(trip["Ship Bundle"]);
-    if (filterStart && filterEnd) {
-      if (bundleDate < filterStart || bundleDate > filterEnd) {
-        return;
-      }
-    }
-
-    const tile = createTripTile(trip);
-    // Decide which column
-    let colId;
-    if (trip["Trip Verification Status"] === "TX Approved") {
-      colId = "TX Approved";
-    } else if (trip["Trip Verification Status"] === "Rejected") {
-      colId = "Rejected";
-    } else {
-      colId = "Pending";
-    }
-    document.getElementById(`col-${colId}`).appendChild(tile);
-  });
+// Save and load status & assignment from localStorage (frontend persistence)
+function saveTripState(tripId, field, value) {
+  const key = `tripState_${tripId}`;
+  let obj = JSON.parse(localStorage.getItem(key) || "{}");
+  obj[field] = value;
+  localStorage.setItem(key, JSON.stringify(obj));
+}
+function loadTripState(tripId) {
+  return JSON.parse(localStorage.getItem(`tripState_${tripId}`) || "{}");
 }
 
-// Create a tile element from trip object
-function createTripTile(trip) {
+// --- Rendering / layout ---
+
+function clearGridCells() {
+  const cells = document.querySelectorAll(".cell");
+  cells.forEach(c => {
+    c.innerHTML = "";
+  });
+}
+function renderMetrics(filteredTrips) {
+  document.getElementById("totalTrips").textContent = filteredTrips.length;
+  let sum = 0;
+  filteredTrips.forEach(tr => {
+    sum += Number(tr["Items Accepted"]) || 0;
+  });
+  document.getElementById("totalItems").textContent = sum;
+}
+function renderGrid(filterStart, filterEnd) {
+  clearGridCells();
+  // Filter trips by date range
+  const filtered = allTrips.filter(trip => {
+    const bd = parseDateString(trip["Ship Bundle"]);
+    if (filterStart && filterEnd) {
+      return bd >= filterStart && bd <= filterEnd;
+    }
+    return true;
+  });
+
+  // Sort by Ship Bundle date ascending
+  filtered.sort((a, b) => {
+    const da = parseDateString(a["Ship Bundle"]);
+    const db = parseDateString(b["Ship Bundle"]);
+    return da - db;
+  });
+
+  renderMetrics(filtered);
+
+  filtered.forEach(trip => {
+    const weekday = getWeekdayNumber(trip["Ship Bundle"]);
+    // We only have Mon-Fri (1-5) columns
+    if (weekday > 5) return;
+
+    // Determine status cell status (either from saved or from trip field)
+    const saved = loadTripState(trip["Trip ID"]);
+    const status = saved.status || trip["Trip Verification Status"];
+    const cell = document.querySelector(`.cell[data-status="${status}"][data-day="${weekday}"]`);
+    if (!cell) return;
+
+    const tile = createTripTile(trip, status);
+    cell.appendChild(tile);
+  });
+
+  setupDragAndDrop();  // reinitialize drag within cells
+}
+
+function createTripTile(trip, status) {
   const div = document.createElement("div");
   div.classList.add("trip-tile");
-
-  // Add class based on verification
-  const status = trip["Trip Verification Status"];
-  if (status === "TX Approved") {
-    div.classList.add("approved");
-  } else if (status.toLowerCase().includes("reject")) {
-    div.classList.add("rejected");
-  } else {
-    div.classList.add("pending");
+  // highlight rules
+  if (trip["Trip Verification Status"] !== "TX Approved") {
+    div.classList.add("highlight-not-approved");
+  }
+  if (STATES_RED.has(trip["USA Dest"])) {
+    div.classList.add("highlight-dest-red");
+  }
+  if (TRAVELER_PURPLE.has(trip["Traveler"])) {
+    div.classList.add("highlight-trav-purple");
   }
 
-  const summary = document.createElement("div");
-  summary.classList.add("summary");
-  summary.innerHTML = `
+  // store data attrs
+  div.dataset.tripId = trip["Trip ID"];
+  div.dataset.status = status;
+
+  // Summary
+  const sum = document.createElement("div");
+  sum.classList.add("summary");
+  sum.innerHTML = `
     <div><strong>ID:</strong> ${trip["Trip ID"]}</div>
     <div><strong>Traveler:</strong> ${trip["Traveler"]}</div>
     <div><strong>Ship Bundle:</strong> ${trip["Ship Bundle"]}</div>
     <div><strong>Dest:</strong> ${trip["USA Dest"]}</div>
     <div><strong>Accepted:</strong> ${trip["Items Accepted"]}</div>
-    <div><strong>Status:</strong> ${trip["Trip Verification Status"]}</div>
+    <div><strong>Status:</strong> ${status}</div>
   `;
-  div.appendChild(summary);
+  div.appendChild(sum);
 
-  const details = document.createElement("div");
-  details.classList.add("details");
-  details.innerHTML = `
-    <div><strong>Max USA Date:</strong> ${trip["Max USA Date"] || ""}</div>
+  // Details
+  const dt = document.createElement("div");
+  dt.classList.add("details");
+  dt.innerHTML = `
+    <div><strong>Max USA Date:</strong> ${trip["Max USA Date"]}</div>
     <div><strong>Items Ready to process:</strong> ${trip["Items Ready to process"]}</div>
-    <div><strong>Total Bundle Weight:</strong> ${trip["Total Bundle Weight"]}</div>
+    <div><strong>Total Weight:</strong> ${trip["Total Bundle Weight"]}</div>
     <div><strong>User ID:</strong> ${trip["User ID"]}</div>
-    <!-- You can add more fields as needed -->
   `;
-  div.appendChild(details);
+  div.appendChild(dt);
 
-  // Toggle expansion on click
   div.addEventListener("click", e => {
-    // Avoid toggling when clicking on input
     if (e.target.tagName.toLowerCase() === "input") return;
     div.classList.toggle("expanded");
   });
 
   // Assign input
-  const assignInput = document.createElement("input");
-  assignInput.type = "text";
-  assignInput.placeholder = "Your name...";
-  assignInput.classList.add("assign-input");
-  // Load saved from localStorage
-  const saveKey = `assign_${trip["Trip ID"]}`;
-  assignInput.value = localStorage.getItem(saveKey) || "";
-  assignInput.addEventListener("change", () => {
-    localStorage.setItem(saveKey, assignInput.value);
+  const inp = document.createElement("input");
+  inp.type = "text";
+  inp.placeholder = "Your name...";
+  inp.classList.add("assign-input");
+  const saved = loadTripState(trip["Trip ID"]);
+  inp.value = saved.assignedName || "";
+  inp.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const name = inp.value.trim();
+      saveTripState(trip["Trip ID"], "assignedName", name);
+      // Optionally display it in summary or change appearance
+      inp.blur();
+    }
   });
-  div.appendChild(assignInput);
+  div.appendChild(inp);
 
   return div;
 }
 
-// Initialize drag & drop on column bodies
 function setupDragAndDrop() {
-  const allBodies = document.querySelectorAll(".column-body");
-  allBodies.forEach(body => {
-    Sortable.create(body, {
-      group: "shared",  // allow dragging between columns
+  const cells = document.querySelectorAll(".cell");
+  cells.forEach(cell => {
+    Sortable.create(cell, {
+      group: "sharedGrid",
       animation: 150,
       onAdd: (evt) => {
-        // When a tile is added to a new column, you could update its status field
         const tile = evt.item;
-        const newCol = evt.to.getAttribute("id"); // e.g. "col-Pending"
-        // We can map "col-Pending" → status string
-        const status = newCol.replace("col-", "");
-        // Optionally store this assignment somewhere
-        // e.g. localStorage or backend
-        tile.dataset.manualStatus = status;
+        const newStatus = evt.to.getAttribute("data-status");
+        const tripId = tile.dataset.tripId;
+        saveTripState(tripId, "status", newStatus);
       }
     });
   });
 }
 
-// Handler for CSV load
-document.getElementById("csvInput").addEventListener("change", (e) => {
+// --- CSV load + filter wiring ---
+
+document.getElementById("csvInput").addEventListener("change", e => {
   const file = e.target.files[0];
   if (!file) return;
   Papa.parse(file, {
     header: true,
     skipEmptyLines: true,
-    complete: (results) => {
+    complete: results => {
       allTrips = results.data;
       const { start, end } = getDefaultDateRange();
       document.getElementById("dateStart").valueAsDate = start;
       document.getElementById("dateEnd").valueAsDate = end;
-      renderTrips(start, end);
-      setupDragAndDrop();
+      renderGrid(start, end);
     }
   });
 });
 
-// Date filter handlers
 document.getElementById("applyDateFilter").addEventListener("click", () => {
   const start = document.getElementById("dateStart").valueAsDate;
   const end = document.getElementById("dateEnd").valueAsDate;
-  renderTrips(start, end);
-  setupDragAndDrop();
+  renderGrid(start, end);
 });
 document.getElementById("resetDateFilter").addEventListener("click", () => {
   const { start, end } = getDefaultDateRange();
   document.getElementById("dateStart").valueAsDate = start;
   document.getElementById("dateEnd").valueAsDate = end;
-  renderTrips(start, end);
-  setupDragAndDrop();
+  renderGrid(start, end);
 });
+

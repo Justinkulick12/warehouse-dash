@@ -1,89 +1,86 @@
+/* Global */
 body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
 }
-
 header {
-  background-color: #0073e6;
+  background: #0073e6;
   color: white;
-  padding: 16px;
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
 }
-
-.filters label, .filters input, .filters button {
+.filters input, .filters label, .filters button {
   margin: 0 4px;
 }
-
-.kanban-container {
+#summary-metrics {
   display: flex;
-  overflow-x: auto;
-  padding: 16px;
   gap: 16px;
+  padding: 12px 16px;
+  background: #f0f0f0;
 }
-
-.kanban-column {
-  background-color: #f4f4f4;
-  border-radius: 8px;
-  width: 250px;
-  min-width: 250px;
+.grid-container {
+  display: grid;
+  grid-template-columns: 120px repeat(5, 1fr);
+  grid-auto-rows: 160px;
+  gap: 8px;
+  padding: 16px;
+}
+.grid-header {
+  font-weight: bold;
+  background: #ddd;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
-
-.kanban-column h2 {
-  text-align: center;
-  background-color: #ddd;
-  margin: 0;
-  padding: 8px 0;
+.status-col {
+  background: #ddd;
+  writing-mode: vertical-rl;
+  text-orientation: sideways;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-
-.column-body {
-  flex: 1;
-  padding: 8px;
-  min-height: 50px;
+.cell {
+  background: #fafafa;
+  border: 1px solid #ccc;
+  position: relative;
+  overflow-y: auto;
 }
-
+/* Trip tile */
 .trip-tile {
   background: white;
-  border: 1px solid #ccc;
+  border: 1px solid #999;
   border-radius: 4px;
-  margin-bottom: 8px;
-  padding: 8px;
+  margin: 4px;
+  padding: 6px;
   cursor: grab;
-  position: relative;
+  font-size: 0.9em;
 }
-
-.trip-tile.approved {
-  border-left: 5px solid green;
-}
-
-.trip-tile.rejected {
-  border-left: 5px solid red;
-}
-
-.trip-tile.pending {
-  border-left: 5px solid orange;
-}
-
 .trip-tile .summary {
   font-weight: bold;
 }
-
 .trip-tile .details {
   display: none;
-  margin-top: 8px;
-  font-size: 0.9em;
-  color: #333;
+  margin-top: 4px;
+  font-size: 0.85em;
 }
-
 .trip-tile.expanded .details {
   display: block;
 }
-
-.assign-input {
-  margin-top: 4px;
+.trip-tile input.assign-input {
   width: 100%;
+  margin-top: 4px;
+}
+/* Highlight rules */
+.highlight-not-approved {
+  background: #fff4e5; /* light orange */
+}
+.highlight-dest-red {
+  background: #ffe5e5; /* light red */
+}
+.highlight-trav-purple {
+  background: #f1e5ff; /* light purple */
 }

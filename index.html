@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shappi Warehouse Dashboard</title>
+  <title>Shappi Bundle Dashboard</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header>
-    <h1>Shappi Warehouse — Bundle Prep Dashboard</h1>
+    <h1>Shappi Warehouse Dashboard</h1>
     <div class="filters">
       <label for="dateStart">From:</label>
       <input type="date" id="dateStart" />
@@ -19,34 +19,63 @@
     </div>
   </header>
 
+  <section id="summary-metrics">
+    <div>Total Trips: <span id="totalTrips">0</span></div>
+    <div>Total Items Accepted: <span id="totalItems">0</span></div>
+    <!-- Add more metrics as needed -->
+  </section>
+
   <main>
-    <div class="kanban-container">
-      <div class="kanban-column" data-status="Pending">
-        <h2>Pending / In Progress</h2>
-        <div class="column-body" id="col-Pending"></div>
-      </div>
-      <div class="kanban-column" data-status="TX Approved">
-        <h2>Approved (TX Approved)</h2>
-        <div class="column-body" id="col-TX Approved"></div>
-      </div>
-      <div class="kanban-column" data-status="Rejected">
-        <h2>Rejected / Other</h2>
-        <div class="column-body" id="col-Rejected"></div>
-      </div>
-      <div class="kanban-column" data-status="Preparing">
-        <h2>Preparing Bundle</h2>
-        <div class="column-body" id="col-Preparing"></div>
-      </div>
-      <div class="kanban-column" data-status="ReadyForLabel">
-        <h2>Bundle Prepped / Ready for Label</h2>
-        <div class="column-body" id="col-ReadyForLabel"></div>
-      </div>
+    <div class="grid-container">
+      <div class="grid-header status-col"></div>
+      <!-- Weekday headers -->
+      <div class="grid-header">Monday</div>
+      <div class="grid-header">Tuesday</div>
+      <div class="grid-header">Wednesday</div>
+      <div class="grid-header">Thursday</div>
+      <div class="grid-header">Friday</div>
+
+      <!-- Rows for each status -->
+      <div class="status-col">Pending</div>
+      <div class="cell" data-status="Pending" data-day="1"></div>
+      <div class="cell" data-status="Pending" data-day="2"></div>
+      <div class="cell" data-status="Pending" data-day="3"></div>
+      <div class="cell" data-status="Pending" data-day="4"></div>
+      <div class="cell" data-status="Pending" data-day="5"></div>
+
+      <div class="status-col">TX Approved</div>
+      <div class="cell" data-status="TX Approved" data-day="1"></div>
+      <div class="cell" data-status="TX Approved" data-day="2"></div>
+      <div class="cell" data-status="TX Approved" data-day="3"></div>
+      <div class="cell" data-status="TX Approved" data-day="4"></div>
+      <div class="cell" data-status="TX Approved" data-day="5"></div>
+
+      <div class="status-col">Rejected</div>
+      <div class="cell" data-status="Rejected" data-day="1"></div>
+      <div class="cell" data-status="Rejected" data-day="2"></div>
+      <div class="cell" data-status="Rejected" data-day="3"></div>
+      <div class="cell" data-status="Rejected" data-day="4"></div>
+      <div class="cell" data-status="Rejected" data-day="5"></div>
+
+      <div class="status-col">Preparing</div>
+      <div class="cell" data-status="Preparing" data-day="1"></div>
+      <div class="cell" data-status="Preparing" data-day="2"></div>
+      <div class="cell" data-status="Preparing" data-day="3"></div>
+      <div class="cell" data-status="Preparing" data-day="4"></div>
+      <div class="cell" data-status="Preparing" data-day="5"></div>
+
+      <div class="status-col">ReadyForLabel</div>
+      <div class="cell" data-status="ReadyForLabel" data-day="1"></div>
+      <div class="cell" data-status="ReadyForLabel" data-day="2"></div>
+      <div class="cell" data-status="ReadyForLabel" data-day="3"></div>
+      <div class="cell" data-status="ReadyForLabel" data-day="4"></div>
+      <div class="cell" data-status="ReadyForLabel" data-day="5"></div>
     </div>
   </main>
 
   <footer>
     <input type="file" id="csvInput" accept=".csv" />
-    <p>Load a CSV file to populate the dashboard.</p>
+    <p>Upload CSV to load trips.</p>
   </footer>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
@@ -54,3 +83,4 @@
   <script src="app.js"></script>
 </body>
 </html>
+
