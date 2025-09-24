@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shappi Warehouse Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Shappi Warehouse — Bundle Prep Dashboard</h1>
+    <div class="filters">
+      <label for="dateStart">From:</label>
+      <input type="date" id="dateStart" />
+      <label for="dateEnd">To:</label>
+      <input type="date" id="dateEnd" />
+      <button id="applyDateFilter">Apply</button>
+      <button id="resetDateFilter">Reset</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="kanban-container">
+      <div class="kanban-column" data-status="Pending">
+        <h2>Pending / In Progress</h2>
+        <div class="column-body" id="col-Pending"></div>
+      </div>
+      <div class="kanban-column" data-status="TX Approved">
+        <h2>Approved (TX Approved)</h2>
+        <div class="column-body" id="col-TX Approved"></div>
+      </div>
+      <div class="kanban-column" data-status="Rejected">
+        <h2>Rejected / Other</h2>
+        <div class="column-body" id="col-Rejected"></div>
+      </div>
+      <div class="kanban-column" data-status="Preparing">
+        <h2>Preparing Bundle</h2>
+        <div class="column-body" id="col-Preparing"></div>
+      </div>
+      <div class="kanban-column" data-status="ReadyForLabel">
+        <h2>Bundle Prepped / Ready for Label</h2>
+        <div class="column-body" id="col-ReadyForLabel"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <input type="file" id="csvInput" accept=".csv" />
+    <p>Load a CSV file to populate the dashboard.</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

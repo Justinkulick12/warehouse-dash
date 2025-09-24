@@ -1,0 +1,89 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background-color: #0073e6;
+  color: white;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.filters label, .filters input, .filters button {
+  margin: 0 4px;
+}
+
+.kanban-container {
+  display: flex;
+  overflow-x: auto;
+  padding: 16px;
+  gap: 16px;
+}
+
+.kanban-column {
+  background-color: #f4f4f4;
+  border-radius: 8px;
+  width: 250px;
+  min-width: 250px;
+  display: flex;
+  flex-direction: column;
+}
+
+.kanban-column h2 {
+  text-align: center;
+  background-color: #ddd;
+  margin: 0;
+  padding: 8px 0;
+}
+
+.column-body {
+  flex: 1;
+  padding: 8px;
+  min-height: 50px;
+}
+
+.trip-tile {
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  padding: 8px;
+  cursor: grab;
+  position: relative;
+}
+
+.trip-tile.approved {
+  border-left: 5px solid green;
+}
+
+.trip-tile.rejected {
+  border-left: 5px solid red;
+}
+
+.trip-tile.pending {
+  border-left: 5px solid orange;
+}
+
+.trip-tile .summary {
+  font-weight: bold;
+}
+
+.trip-tile .details {
+  display: none;
+  margin-top: 8px;
+  font-size: 0.9em;
+  color: #333;
+}
+
+.trip-tile.expanded .details {
+  display: block;
+}
+
+.assign-input {
+  margin-top: 4px;
+  width: 100%;
+}
