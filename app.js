@@ -1,4 +1,3 @@
-// --- Helper constants & sets ---
 const STATES_RED = new Set(["NY","NJ","CA","MA","NV","OR"]);
 const TRAVELER_PURPLE = new Set([
   "Gabriela Endara","Jose Arroyo","Andres Alvarez","Gianni Bloise","Genesis Ronquillo",
@@ -17,9 +16,8 @@ function parseDateString(str) {
   return new Date(str);
 }
 function getWeekdayNumber(date) {
-  // returns 1 = Monday, ... 7 = Sunday
   const d = new Date(date);
-  let wd = d.getDay(); // 0 (Sun) to 6 (Sat)
+  let wd = d.getDay();
   if (wd === 0) wd = 7;
   return wd;
 }
@@ -30,10 +28,8 @@ function getDefaultDateRange() {
   return { start: now, end };
 }
 
-// --- Global state ---
-let allTrips = [];  // original data array
+let allTrips = [];
 
-// Save and load status & assignment from localStorage (frontend persistence)
 function saveTripState(tripId, field, value) {
   const key = `tripState_${tripId}`;
   let obj = JSON.parse(localStorage.getItem(key) || "{}");
@@ -44,13 +40,8 @@ function loadTripState(tripId) {
   return JSON.parse(localStorage.getItem(`tripState_${tripId}`) || "{}");
 }
 
-// --- Rendering / layout ---
-
 function clearGridCells() {
-  const cells = document.querySelectorAll(".cell");
-  cells.forEach(c => {
-    c.innerHTML = "";
-  });
+  document.querySelectorAll(".cell").forEach(c => c.innerHTML = "");
 }
 function renderMetrics(filteredTrips) {
   document.getElementById("totalTrips").textContent = filteredTrips.length;
@@ -62,7 +53,6 @@ function renderMetrics(filteredTrips) {
 }
 function renderGrid(filterStart, filterEnd) {
   clearGridCells();
-  // Filter trips by date range
   const filtered = allTrips.filter(trip => {
     const bd = parseDateString(trip["Ship Bundle"]);
     if (filterStart && filterEnd) {
@@ -71,21 +61,16 @@ function renderGrid(filterStart, filterEnd) {
     return true;
   });
 
-  // Sort by Ship Bundle date ascending
   filtered.sort((a, b) => {
-    const da = parseDateString(a["Ship Bundle"]);
-    const db = parseDateString(b["Ship Bundle"]);
-    return da - db;
+    return parseDateString(a["Ship Bundle"]) - parseDateString(b["Ship Bundle"]);
   });
 
   renderMetrics(filtered);
 
   filtered.forEach(trip => {
     const weekday = getWeekdayNumber(trip["Ship Bundle"]);
-    // We only have Mon-Fri (1-5) columns
     if (weekday > 5) return;
 
-    // Determine status cell status (either from saved or from trip field)
     const saved = loadTripState(trip["Trip ID"]);
     const status = saved.status || trip["Trip Verification Status"];
     const cell = document.querySelector(`.cell[data-status="${status}"][data-day="${weekday}"]`);
@@ -95,13 +80,12 @@ function renderGrid(filterStart, filterEnd) {
     cell.appendChild(tile);
   });
 
-  setupDragAndDrop();  // reinitialize drag within cells
+  setupDragAndDrop();
 }
 
 function createTripTile(trip, status) {
   const div = document.createElement("div");
   div.classList.add("trip-tile");
-  // highlight rules
   if (trip["Trip Verification Status"] !== "TX Approved") {
     div.classList.add("highlight-not-approved");
   }
@@ -112,11 +96,9 @@ function createTripTile(trip, status) {
     div.classList.add("highlight-trav-purple");
   }
 
-  // store data attrs
   div.dataset.tripId = trip["Trip ID"];
   div.dataset.status = status;
 
-  // Summary
   const sum = document.createElement("div");
   sum.classList.add("summary");
   sum.innerHTML = `
@@ -129,7 +111,6 @@ function createTripTile(trip, status) {
   `;
   div.appendChild(sum);
 
-  // Details
   const dt = document.createElement("div");
   dt.classList.add("details");
   dt.innerHTML = `
@@ -145,7 +126,6 @@ function createTripTile(trip, status) {
     div.classList.toggle("expanded");
   });
 
-  // Assign input
   const inp = document.createElement("input");
   inp.type = "text";
   inp.placeholder = "Your name...";
@@ -157,7 +137,6 @@ function createTripTile(trip, status) {
       e.preventDefault();
       const name = inp.value.trim();
       saveTripState(trip["Trip ID"], "assignedName", name);
-      // Optionally display it in summary or change appearance
       inp.blur();
     }
   });
@@ -167,12 +146,11 @@ function createTripTile(trip, status) {
 }
 
 function setupDragAndDrop() {
-  const cells = document.querySelectorAll(".cell");
-  cells.forEach(cell => {
+  document.querySelectorAll(".cell").forEach(cell => {
     Sortable.create(cell, {
       group: "sharedGrid",
       animation: 150,
-      onAdd: (evt) => {
+      onAdd: evt => {
         const tile = evt.item;
         const newStatus = evt.to.getAttribute("data-status");
         const tripId = tile.dataset.tripId;
@@ -181,8 +159,6 @@ function setupDragAndDrop() {
     });
   });
 }
-
-// --- CSV load + filter wiring ---
 
 document.getElementById("csvInput").addEventListener("change", e => {
   const file = e.target.files[0];
@@ -211,4 +187,3 @@ document.getElementById("resetDateFilter").addEventListener("click", () => {
   document.getElementById("dateEnd").valueAsDate = end;
   renderGrid(start, end);
 });
-
