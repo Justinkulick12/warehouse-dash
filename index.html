@@ -1,21 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
-head>
+<head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shappi Bundle Dashboard</title>
+  <title>Shappi Warehouse Dashboard</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header>
     <h1>Shappi Warehouse Dashboard</h1>
-    <div class="filters">
-      <label for="dateStart">From:</label>
-      <input type="date" id="dateStart" />
-      <label for="dateEnd">To:</label>
-      <input type="date" id="dateEnd" />
-      <button id="applyDateFilter">Apply</button>
-      <button id="resetDateFilter">Reset</button>
+    <div class="controls">
+      <div class="filters">
+        <label for="dateStart">From:</label>
+        <input type="date" id="dateStart" />
+        <label for="dateEnd">To:</label>
+        <input type="date" id="dateEnd" />
+        <button id="applyDateFilter">Apply</button>
+        <button id="resetDateFilter">Reset</button>
+      </div>
+      <div class="view-toggle">
+        <button id="btnGrid">Grid View</button>
+        <button id="btnList">List View</button>
+      </div>
     </div>
   </header>
 
@@ -24,49 +30,32 @@ head>
     <div>Total Items Accepted: <span id="totalItems">0</span></div>
   </section>
 
+  <section id="charts-section">
+    <canvas id="statusChart" width="400" height="200"></canvas>
+  </section>
+
   <main>
-    <div class="grid-container">
+    <!-- Grid Container -->
+    <div id="gridView" class="grid-container">
       <div class="grid-header status-col"></div>
-      <div class="grid-header">Monday</div>
-      <div class="grid-header">Tuesday</div>
-      <div class="grid-header">Wednesday</div>
-      <div class="grid-header">Thursday</div>
-      <div class="grid-header">Friday</div>
+      <!-- Weekday headers will be inserted dynamically -->
+      <!-- Status rows / cells will be filled dynamically -->
+    </div>
 
-      <div class="status-col">Pending</div>
-      <div class="cell" data-status="Pending" data-day="1"></div>
-      <div class="cell" data-status="Pending" data-day="2"></div>
-      <div class="cell" data-status="Pending" data-day="3"></div>
-      <div class="cell" data-status="Pending" data-day="4"></div>
-      <div class="cell" data-status="Pending" data-day="5"></div>
-
-      <div class="status-col">TX Approved</div>
-      <div class="cell" data-status="TX Approved" data-day="1"></div>
-      <div class="cell" data-status="TX Approved" data-day="2"></div>
-      <div class="cell" data-status="TX Approved" data-day="3"></div>
-      <div class="cell" data-status="TX Approved" data-day="4"></div>
-      <div class="cell" data-status="TX Approved" data-day="5"></div>
-
-      <div class="status-col">Rejected</div>
-      <div class="cell" data-status="Rejected" data-day="1"></div>
-      <div class="cell" data-status="Rejected" data-day="2"></div>
-      <div class="cell" data-status="Rejected" data-day="3"></div>
-      <div class="cell" data-status="Rejected" data-day="4"></div>
-      <div class="cell" data-status="Rejected" data-day="5"></div>
-
-      <div class="status-col">Preparing</div>
-      <div class="cell" data-status="Preparing" data-day="1"></div>
-      <div class="cell" data-status="Preparing" data-day="2"></div>
-      <div class="cell" data-status="Preparing" data-day="3"></div>
-      <div class="cell" data-status="Preparing" data-day="4"></div>
-      <div class="cell" data-status="Preparing" data-day="5"></div>
-
-      <div class="status-col">ReadyForLabel</div>
-      <div class="cell" data-status="ReadyForLabel" data-day="1"></div>
-      <div class="cell" data-status="ReadyForLabel" data-day="2"></div>
-      <div class="cell" data-status="ReadyForLabel" data-day="3"></div>
-      <div class="cell" data-status="ReadyForLabel" data-day="4"></div>
-      <div class="cell" data-status="ReadyForLabel" data-day="5"></div>
+    <!-- List View (hidden by default) -->
+    <div id="listView" class="list-container" style="display: none;">
+      <table>
+        <thead>
+          <tr>
+            <th>Trip ID</th><th>Traveler</th><th>Ship Bundle</th><th>Max USA Date</th>
+            <th>USA Dest</th><th>Items Accepted</th><th>Status</th><th>Items Ready</th>
+            <th>Assigned To</th>
+          </tr>
+        </thead>
+        <tbody id="listBody">
+          <!-- Rows injected here -->
+        </tbody>
+      </table>
     </div>
   </main>
 
@@ -77,6 +66,7 @@ head>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
