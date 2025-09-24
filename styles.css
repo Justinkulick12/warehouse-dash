@@ -6,13 +6,22 @@ body {
 header {
   background: #0073e6;
   color: white;
+  padding: 12px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
+}
+.controls {
+  display: flex;
+  gap: 24px;
+  align-items: center;
 }
 .filters input, .filters label, .filters button {
   margin: 0 4px;
+}
+.view-toggle button {
+  margin: 0 4px;
+  padding: 6px 12px;
 }
 #summary-metrics {
   display: flex;
@@ -20,19 +29,21 @@ header {
   padding: 12px 16px;
   background: #f0f0f0;
 }
+#charts-section {
+  padding: 16px;
+  background: #fff;
+}
 .grid-container {
   display: grid;
   grid-template-columns: 120px repeat(5, 1fr);
-  grid-auto-rows: 160px;
   gap: 8px;
   padding: 16px;
 }
 .grid-header {
-  font-weight: bold;
   background: #ddd;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-weight: bold;
+  text-align: center;
+  padding: 8px 0;
 }
 .status-col {
   background: #ddd;
@@ -41,12 +52,14 @@ header {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 4px;
 }
 .cell {
   background: #fafafa;
   border: 1px solid #ccc;
   position: relative;
   overflow-y: auto;
+  min-height: 120px;
 }
 .trip-tile {
   background: white;
@@ -81,6 +94,28 @@ header {
 .highlight-trav-purple {
   background: #f1e5ff;
 }
+.list-container {
+  padding: 16px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+table th, table td {
+  border: 1px solid #ccc;
+  padding: 6px;
+  text-align: left;
+}
+tr.highlight-not-approved td {
+  background: #fff4e5;
+}
+tr.highlight-dest-red td {
+  background: #ffe5e5;
+}
+tr.highlight-trav-purple td {
+  background: #f1e5ff;
+}
+
 }
 .highlight-trav-purple {
   background: #f1e5ff; /* light purple */
